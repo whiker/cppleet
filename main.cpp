@@ -1,6 +1,6 @@
 #include "header.h"
 
 int main() {
-    TwoSum_001::test();
+    BestTimeToBuySellStock_121::test();
     return 0;
 }

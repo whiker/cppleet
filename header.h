@@ -9,4 +9,8 @@ namespace TwoSum_001 {
     void test();
 }
 
+namespace BestTimeToBuySellStock_121 {
+    void test();
+}
+
 #endif //CPPLEET_HEADER_H

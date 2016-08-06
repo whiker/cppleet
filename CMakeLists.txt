@@ -3,7 +3,7 @@ project(cppleet)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 
-set(SOURCE_FILES main.cpp TwoSum_001.cpp header.h)
+set(SOURCE_FILES main.cpp TwoSum_001.cpp header.h BestTimeToBuySellStock_121.cpp)
 add_executable(cppleet ${SOURCE_FILES})
 
 # gtest gmock
