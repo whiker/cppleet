@@ -9,7 +9,7 @@ using namespace std;
 
 namespace BestTimeToBuySellStock_121 {
 
-    /**
+    /*
      * 对于第i天, 找左边最小值与之相减, 得到第i天卖出的最大收益(localMaxProfit)
      * 计算全局最大收益(maxProfit)
      */

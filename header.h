@@ -13,4 +13,8 @@ namespace BestTimeToBuySellStock_121 {
     void test();
 }
 
+namespace PatchArray_330 {
+    void test();
+}
+
 #endif //CPPLEET_HEADER_H
