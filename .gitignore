@@ -1,1 +1,9 @@
 .idea/
+cmake-build-debug/*
+
+build/*
+test/build/*
+
+ext/*
+
+include/run_app.h
