@@ -15,5 +15,7 @@ else
     cd build
 fi
 make
-clear
-./cppleet
+if [ $? -eq 0 ]; then
+    clear
+    ./cppleet
+fi
