@@ -24,3 +24,4 @@ add_executable(cppleet ${SOURCE_FILES})
 
 # gtest
 target_link_libraries(cppleet gtest)
+target_link_libraries(cppleet pthread)

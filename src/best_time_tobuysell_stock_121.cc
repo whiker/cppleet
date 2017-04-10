@@ -21,7 +21,7 @@ namespace BestTimeToBuySellStock_121 {
             }
             int maxProfit = 0, localMaxProfit;
             int min = prices[0];
-            for (int i = 1; i < prices.size(); i++) {
+            for (vector<int>::size_type i = 1; i < prices.size(); i++) {
                 localMaxProfit = prices[i] - min;
                 if (localMaxProfit > maxProfit) {
                     maxProfit = localMaxProfit;

@@ -15,7 +15,8 @@ namespace TwoSum_001 {
         vector<int> twoSum(vector<int> &nums, int target) {
             HashMap numMap(8);
             int i, j;
-            for (i = 0; i < nums.size(); i++) {
+            const int NumsSize = nums.size();
+            for (i = 0; i < NumsSize; i++) {
                 j = numMap.get(nums[i]);
                 if (j != 0) {
                     return vector<int>({j - 1, i});
