@@ -1,6 +1,10 @@
 #include <iostream>
 #include <vector>
 #include <algorithm>
+#include <thread>
+#include <mutex>
+#include <condition_variable>
+#include <chrono>
 
 using namespace std;
 
@@ -53,6 +57,7 @@ private:
     int foo;
 };
 
+// 重载ostream的操作符"<<"
 ostream& operator << (ostream& out, const Foo &foo) {
     out << foo.foo;
     return out;
@@ -71,9 +76,58 @@ void compareAndSortVector() {
     cout << "}" << endl;
 }
 
+int functionStaticVarInitNum = 0;
+std::mutex functionStaticVarInitNumMutex;
+
+int functionStaticVar() {
+    static int var = [] () -> int {
+        // pthread_once
+        int num;
+        {
+            std::lock_guard<std::mutex> guard(functionStaticVarInitNumMutex);
+            num = ++functionStaticVarInitNum;
+        }
+        return num;
+    }();
+    return var;
+}
+
+void testfunctionStaticVarInitNumtaticVar() {
+    std::mutex mtx;
+    std::condition_variable cond;
+    auto waitStart = std::chrono::high_resolution_clock::now();
+    auto test = [&mtx, &cond, &waitStart] {
+        {
+            std::unique_lock<std::mutex> lock(mtx);
+            cond.wait(lock);
+        }
+        auto waitEnd = std::chrono::high_resolution_clock::now();
+        functionStaticVar();
+        cout << "wait: " << (waitEnd - waitStart).count() << endl;
+    };
+
+    const int ThreadNum = 4;
+    std::thread* ths[ThreadNum];
+    for (int i = 0; i < ThreadNum; ++i) {
+        ths[i] = new std::thread(test);
+    }
+
+    std::this_thread::sleep_for(std::chrono::seconds(2));
+    cond.notify_all();
+
+    for (int i = 0; i < ThreadNum; ++i) {
+        ths[i]->join();
+        delete ths[i];
+    }
+    cout << "var: " << functionStaticVar() << endl;
+}
+
 void test() {
     typedef void (*Func)();
-    Func funcs[] = {sizeofType, printMemoryTest, compareAndSortVector};
+    Func funcs[] = {
+        sizeofType, printMemoryTest, compareAndSortVector,
+        testfunctionStaticVarInitNumtaticVar
+    };
     for (auto f: funcs) {
         f();
         cout << endl;
