@@ -79,16 +79,16 @@ void compareAndSortVector() {
 int functionStaticVarInitNum = 0;
 std::mutex functionStaticVarInitNumMutex;
 
-int functionStaticVar() {
-    static int var = [] () -> int {
+int functionStaticVar(int param) {
+    static int var = [] (int param) -> int {
         // pthread_once
         int num;
         {
             std::lock_guard<std::mutex> guard(functionStaticVarInitNumMutex);
             num = ++functionStaticVarInitNum;
         }
-        return num;
-    }();
+        return num + param;
+    }(param);
     return var;
 }
 
@@ -96,20 +96,20 @@ void testfunctionStaticVarInitNumtaticVar() {
     std::mutex mtx;
     std::condition_variable cond;
     auto waitStart = std::chrono::high_resolution_clock::now();
-    auto test = [&mtx, &cond, &waitStart] {
+    auto test = [&mtx, &cond, &waitStart] (int param) {
         {
             std::unique_lock<std::mutex> lock(mtx);
             cond.wait(lock);
         }
         auto waitEnd = std::chrono::high_resolution_clock::now();
-        functionStaticVar();
-        cout << "wait: " << (waitEnd - waitStart).count() << endl;
+        functionStaticVar(param);
+        cout << param << "> wait: " << (waitEnd - waitStart).count() << endl;
     };
 
     const int ThreadNum = 4;
     std::thread* ths[ThreadNum];
     for (int i = 0; i < ThreadNum; ++i) {
-        ths[i] = new std::thread(test);
+        ths[i] = new std::thread(test, i + 1);
     }
 
     std::this_thread::sleep_for(std::chrono::seconds(2));
@@ -119,7 +119,8 @@ void testfunctionStaticVarInitNumtaticVar() {
         ths[i]->join();
         delete ths[i];
     }
-    cout << "var: " << functionStaticVar() << endl;
+    cout << "init num: " << functionStaticVarInitNum << endl;
+    cout << "var: " << functionStaticVar(0) << endl;
 }
 
 void test() {
