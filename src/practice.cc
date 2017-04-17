@@ -87,6 +87,7 @@ int functionStaticVar(int param) {
             std::lock_guard<std::mutex> guard(functionStaticVarInitNumMutex);
             num = ++functionStaticVarInitNum;
         }
+        std::this_thread::sleep_for(std::chrono::seconds(1));
         return num + param;
     }(param);
     return var;
@@ -101,9 +102,10 @@ void testfunctionStaticVarInitNumtaticVar() {
             std::unique_lock<std::mutex> lock(mtx);
             cond.wait(lock);
         }
-        auto waitEnd = std::chrono::high_resolution_clock::now();
+        auto time1 = std::chrono::high_resolution_clock::now();
         functionStaticVar(param);
-        cout << param << "> wait: " << (waitEnd - waitStart).count() << endl;
+        auto time2 = std::chrono::high_resolution_clock::now();
+        cout << param << "> wait: " << (time1 - waitStart).count() << ", " << (time2 - waitStart).count() << endl;
     };
 
     const int ThreadNum = 4;
@@ -112,7 +114,7 @@ void testfunctionStaticVarInitNumtaticVar() {
         ths[i] = new std::thread(test, i + 1);
     }
 
-    std::this_thread::sleep_for(std::chrono::seconds(2));
+    std::this_thread::sleep_for(std::chrono::seconds(1));
     cond.notify_all();
 
     for (int i = 0; i < ThreadNum; ++i) {
