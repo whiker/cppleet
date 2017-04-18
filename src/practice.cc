@@ -5,6 +5,7 @@
 #include <mutex>
 #include <condition_variable>
 #include <chrono>
+#include <cstdarg>
 
 using namespace std;
 
@@ -125,11 +126,33 @@ void testfunctionStaticVarInitNumtaticVar() {
     cout << "var: " << functionStaticVar(0) << endl;
 }
 
+void variableParams() {
+    auto sum = [] (int num, ...) -> int {
+        if (num <= 0) {
+            return 0;
+        }
+
+        va_list args;
+        va_start(args, num);
+
+        int sum = 0;
+        for (; num > 0; --num) {
+            sum += va_arg(args, int);
+        }
+
+        va_end(args);
+        return sum;
+    };
+
+    cout << sum(1, 3, 2, 1) << endl;  // 3
+    cout << sum(3, 3, 2, 1) << endl;  // 6
+}
+
 void test() {
     typedef void (*Func)();
     Func funcs[] = {
-        sizeofType, printMemoryTest, compareAndSortVector,
-        testfunctionStaticVarInitNumtaticVar
+        /*sizeofType, printMemoryTest, compareAndSortVector,
+        testfunctionStaticVarInitNumtaticVar,*/ variableParams
     };
     for (auto f: funcs) {
         f();
