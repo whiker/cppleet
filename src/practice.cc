@@ -148,11 +148,30 @@ void variableParams() {
     cout << sum(3, 3, 2, 1) << endl;  // 6
 }
 
+template<unsigned N>
+struct SquaresSum {
+    static const unsigned value = N * N + SquaresSum<N-1>::value;
+};
+
+template<>
+struct SquaresSum<0> {
+    static const unsigned value = 0;
+};
+
+void squaresSum() {
+    cout << SquaresSum<0>::value << endl;
+    cout << SquaresSum<1>::value << endl;
+    cout << SquaresSum<2>::value << endl;
+    cout << SquaresSum<3>::value << endl;
+    cout << SquaresSum<4>::value << endl;
+}
+
 void test() {
     typedef void (*Func)();
     Func funcs[] = {
         /*sizeofType, printMemoryTest, compareAndSortVector,
-        testfunctionStaticVarInitNumtaticVar,*/ variableParams
+        testfunctionStaticVarInitNumtaticVar, variableParams,*/
+        squaresSum
     };
     for (auto f: funcs) {
         f();
