@@ -1,4 +1,5 @@
 #include <iostream>
+#include <sstream>
 #include <vector>
 #include <algorithm>
 #include <thread>
@@ -16,11 +17,10 @@ inline const char* boolToStr(bool b) {
 }
 
 void sizeofType() {
-    cout << "sizeof type" << endl;
-    cout << " unsigned: " << sizeof(unsigned) << endl;
-    cout << "     long: " << sizeof(long) << endl;
-    cout << "long long: " << sizeof(long long) << endl;
-    cout << "   size_t: " << sizeof(size_t) << endl;
+    cout << " unsigned: " << sizeof(unsigned) << endl;   // 4
+    cout << "     long: " << sizeof(long) << endl;       // 8
+    cout << "long long: " << sizeof(long long) << endl;  // 8
+    cout << "   size_t: " << sizeof(size_t) << endl;     // 8
 }
 
 void printMemory(const void *src, int size) {
@@ -68,6 +68,7 @@ ostream& operator << (ostream& out, const Foo &foo) {
 void compareAndSortVector() {
     vector<int> vec{3, 1, 2};
     Foo arr[] = {3, 1, 2};
+    // 比较时int转成Foo
     cout << boolToStr(equal(vec.begin(), vec.end(), arr, Foo::equal)) << endl;
 
     sort(vec.begin(), vec.end(), Foo::compare);
@@ -84,14 +85,13 @@ std::mutex functionStaticVarInitNumMutex;
 int functionStaticVar(int param) {
     static int var = [] (int param) -> int {
         // pthread_once
-        int num;
         {
             std::lock_guard<std::mutex> guard(functionStaticVarInitNumMutex);
-            num = ++functionStaticVarInitNum;
+            ++functionStaticVarInitNum;
         }
         std::this_thread::sleep_for(std::chrono::seconds(1));
-        return num + param;
-    }(param);
+        return param;
+    } (param);
     return var;
 }
 
@@ -102,12 +102,16 @@ void testfunctionStaticVarInitNumtaticVar() {
     auto test = [&mtx, &cond, &waitStart] (int param) {
         {
             std::unique_lock<std::mutex> lock(mtx);
-            cond.wait(lock);
+            cond.wait(lock);  // 等待通知
         }
         auto time1 = std::chrono::high_resolution_clock::now();
-        functionStaticVar(param);
+        int ret = functionStaticVar(param);
         auto time2 = std::chrono::high_resolution_clock::now();
-        cout << param << "> wait: " << (time1 - waitStart).count() << ", " << (time2 - waitStart).count() << endl;
+        ostringstream ostr;
+        ostr << param << "> wait: " << (time1 - waitStart).count()
+             << ", " << (time2 - waitStart).count()
+             << ", " << ret << "\n";
+        cout << ostr.str();
     };
 
     const int ThreadNum = 4;
@@ -117,34 +121,30 @@ void testfunctionStaticVarInitNumtaticVar() {
     }
 
     std::this_thread::sleep_for(std::chrono::seconds(1));
-    cond.notify_all();
+    cond.notify_all();  // 通知
 
     for (int i = 0; i < ThreadNum; ++i) {
         ths[i]->join();
         delete ths[i];
     }
     cout << "init num: " << functionStaticVarInitNum << endl;
-    cout << "var: " << functionStaticVar(0) << endl;
+}
+
+int sum(int num, ...) {
+    if (num <= 0) {
+        return 0;
+    }
+    va_list lst;
+    va_start(lst, num);  // 指定lst的长度是num
+    int sum = 0;
+    for (; num > 0; --num) {  // 取num个实参
+        sum += va_arg(lst, int);
+    }
+    va_end(lst);
+    return sum;
 }
 
 void variableParams() {
-    auto sum = [] (int num, ...) -> int {
-        if (num <= 0) {
-            return 0;
-        }
-
-        va_list args;
-        va_start(args, num);
-
-        int sum = 0;
-        for (; num > 0; --num) {
-            sum += va_arg(args, int);
-        }
-
-        va_end(args);
-        return sum;
-    };
-
     cout << sum(1, 3, 2, 1) << endl;  // 3
     cout << sum(3, 3, 2, 1) << endl;  // 6
 }
@@ -169,15 +169,9 @@ void squaresSum() {
 
 void test() {
     typedef void (*Func)();
-    Func funcs[] = {
-        /*sizeofType, printMemoryTest, compareAndSortVector,
-        testfunctionStaticVarInitNumtaticVar, variableParams,*/
-        squaresSum
-    };
-    for (auto f: funcs) {
-        f();
-        cout << endl;
-    }
+    Func func = testfunctionStaticVarInitNumtaticVar;
+    func();
+    cout << endl;
 }
 
 }
