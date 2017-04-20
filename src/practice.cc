@@ -20,6 +20,7 @@ void sizeofType() {
     cout << " unsigned: " << sizeof(unsigned) << endl;
     cout << "     long: " << sizeof(long) << endl;
     cout << "long long: " << sizeof(long long) << endl;
+    cout << "   size_t: " << sizeof(size_t) << endl;
 }
 
 void printMemory(const void *src, int size) {
