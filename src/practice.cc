@@ -53,7 +53,12 @@ public:
     }
 
 public:
-    Foo(int v): foo(v) {}
+    Foo(int v): foo(v) {
+        cout << "Foo con " << foo << endl;
+    }
+    ~Foo() {
+        cout << "Foo decon " << foo << endl;
+    }
 
 private:
     int foo;
@@ -144,6 +149,7 @@ int sum(int num, ...) {
     return sum;
 }
 
+// 变长参数
 void variableParams() {
     cout << sum(1, 3, 2, 1) << endl;  // 3
     cout << sum(3, 3, 2, 1) << endl;  // 6
@@ -159,6 +165,7 @@ struct SquaresSum<0> {
     static const unsigned value = 0;
 };
 
+// 模板元
 void squaresSum() {
     cout << SquaresSum<0>::value << endl;
     cout << SquaresSum<1>::value << endl;
@@ -167,9 +174,28 @@ void squaresSum() {
     cout << SquaresSum<4>::value << endl;
 }
 
+void testUniquePtr() {
+    unique_ptr<Foo> p(new Foo(1));  // construct foo1
+
+    cout << "step-1" << endl;
+    p.reset(new Foo(2));  // construct foo2, then deconsturct foo1
+
+    cout << "step-2" << endl;
+    unique_ptr<Foo> p1(new Foo(3));  // construct foo3
+
+    p = std::move(p1);  // deconstruct foo2
+    cout << (long) p1.get() << endl;  // 0
+
+    // p = std::move(unique_ptr<Foo>(new Foo(4)));  // compile error
+
+    p = unique_ptr<Foo>(new Foo(4));  // construct foo4, then deconsturct foo3
+    cout << "end" << endl;
+    // deconstruct foo4
+}
+
 void test() {
     typedef void (*Func)();
-    Func func = testfunctionStaticVarInitNumtaticVar;
+    Func func = testUniquePtr;
     func();
     cout << endl;
 }
